@@ -23,9 +23,11 @@ connection.connect(function(err) {
 });
 
 function promptPurchase() {
-    connection.query("SELECT item_id,product_name,price FROM products", function(err, res) {
+    connection.query("SELECT * FROM products", function(err, res) {
         if (err) throw err;
-        console.log(res);
+        for (i = 0; i < res.length; i++) {
+            console.log("Item #: " + res[i].item_id + " || Product: " + res[i].product_name + " || Price: " + res[i].price);
+        }
         // connection.end;
         inquirer.prompt([
             {
@@ -39,17 +41,24 @@ function promptPurchase() {
                 message: "How many would you like to purchase?"
             }
         ]).then(function(user) {
-            console.log(res[0].stock_quantity)
-            for (i = 0; i < res.length; i++) {
-                if (res[i].item_id === user.id) {
-                    if (user.number > res[i].stock_quantity) {
-                        console.log("Insufficient quantity!");
-                    }
-                    else if (user.number <= res[i].stock_quantity) {
-                        console.log("Sufficient quantity!")
-                    };
-                }
+            if (user.number > res[user.id - 1].stock_quantity) {
+                console.log("Insufficient quantity!");
             }
+            else if (user.number <= res[user.id - 1].stock_quantity) {
+                connection.query("UPDATE products SET ? WHERE ?",
+                [{stock_quantity: res[user.id - 1].stock_quantity - user.number}, {item_id: res[user.id - 1].item_id}],
+                function(err) {
+                    if (err) throw err;
+                })
+                connection.query("SELECT * FROM products", function(err, resNew) {
+                    if (err) throw err
+                    // console.log("ID: " + resNew[user.id - 1].item_id)
+                    // console.log("Name: " + resNew[user.id - 1].product_name)
+                    // console.log("New quantity: " + resNew[user.id - 1].stock_quantity)
+                    cost = user.number * resNew[user.id - 1].price
+                    console.log("Your total comes to: " + cost)
+                })
+            };        
         })
     connection.end;
     })
