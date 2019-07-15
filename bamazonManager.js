@@ -18,4 +18,26 @@ var connection = mysql.createConnection({
 connection.connect(function(err) {
     if (err) throw err;
     console.log("connected as id " + connection.threadId + "\n");
+    giveOptions();
 });
+
+function giveOptions() {
+    inquirer.prompt([
+        {
+            type: "list",
+            name: "choice",
+            message: "What would you like to do?",
+            choices: ["View Products for Sale", "View Low Inventory", "Add to Inventory", "Add New Product"]
+        }
+    ]).then(function(choice) {
+        console.log(choice)
+        if ("View Products for Sale") {
+            connection.query("SELECT * FROM products", function(err, res) {
+                if (err) throw err;
+                for (i = 0; i < res.length; i++) {
+                    console.log("Item #: " + res[i].item_id + " || Product: " + res[i].product_name + " || Price: " + res[i].price + " || Quantity: " + res[i].stock_quantity);
+                }
+            })
+        }
+    })
+}
