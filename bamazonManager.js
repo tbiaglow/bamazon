@@ -30,9 +30,7 @@ function giveOptions() {
             choices: ["View Products for Sale", "View Low Inventory", "Add to Inventory", "Add New Product"]
         }
     ]).then(function(choice) {
-        console.log(choice)
         if (choice.choice === "View Products for Sale") {
-            console.log("Honk honk")
             connection.query("SELECT * FROM products", function(err, res) {
                 if (err) throw err;
                 for (i = 0; i < res.length; i++) {
@@ -49,6 +47,36 @@ function giveOptions() {
                     }
                 }
             })
+        }
+        else if (choice.choice === "Add to Inventory") {
+            connection.query("SELECT * FROM products", function(err, res) {
+            if (err) throw err;
+            inquirer.prompt([
+                {
+                    type: "input",
+                    name: "productID",
+                    message: "Which product (ID) would you like to restock?"
+                },
+                {
+                    type: "input",
+                    name: "amount",
+                    message: "How much would you like to add?"
+                }
+            ]).then(function(restock) {
+                for (i = 0; i < res.length; i++) {
+                    if (res[i].item_id == restock.productID) {
+                        connection.query("UPDATE products SET ? WHERE ?", [{stock_quantity: parseInt(res[i].stock_quantity) + parseInt(restock.amount)}, {item_id: res[i].item_id}], function(err) {
+                            if (err) throw err;
+                        })
+                    }
+                }
+                connection.query("SELECT * FROM products", function(err, resNew) {
+                    if (err) throw err;
+                    console.log("Updated quantity information:")
+                    console.log("Item #: " + resNew[restock.productID - 1].item_id + " || Product: " + resNew[restock.productID - 1].product_name + " || Price: " + resNew[restock.productID - 1].price + " || Quantity: " + resNew[restock.productID - 1].stock_quantity)
+                })
+            })
+        })
         }
     })
 }
