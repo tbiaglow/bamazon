@@ -31,11 +31,22 @@ function giveOptions() {
         }
     ]).then(function(choice) {
         console.log(choice)
-        if ("View Products for Sale") {
+        if (choice.choice === "View Products for Sale") {
+            console.log("Honk honk")
             connection.query("SELECT * FROM products", function(err, res) {
                 if (err) throw err;
                 for (i = 0; i < res.length; i++) {
                     console.log("Item #: " + res[i].item_id + " || Product: " + res[i].product_name + " || Price: " + res[i].price + " || Quantity: " + res[i].stock_quantity);
+                }
+            })
+        }
+        else if (choice.choice === "View Low Inventory") {
+            connection.query("SELECT * FROM products", function(err, res) {
+                if (err) throw err;
+                for (i = 0; i < res.length; i++) {
+                    if (res[i].stock_quantity < 5) {
+                        console.log("Item #: " + res[i].item_id + " || Product: " + res[i].product_name + " || Price: " + res[i].price + " || Quantity: " + res[i].stock_quantity);
+                    }
                 }
             })
         }
