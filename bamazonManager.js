@@ -19,6 +19,7 @@ connection.connect(function(err) {
     if (err) throw err;
     console.log("connected as id " + connection.threadId + "\n");
     giveOptions();
+    connection.end;
 });
 
 function giveOptions() {
@@ -77,6 +78,44 @@ function giveOptions() {
                 })
             })
         })
+        }
+        else if (choice.choice === "Add New Product") {
+            connection.query("SELECT * FROM products", function(err, res){
+                if (err) throw err;
+                inquirer.prompt([
+                    {
+                        type: "input",
+                        name: "productName",
+                        message: "What is the name of the new product?"
+                    },
+                    {
+                        type: "input",
+                        name: "department",
+                        message: "What department does it belong in?"
+                    },
+                    {
+                        type: "input",
+                        name: "price",
+                        message: "What is its price per unit?"
+                    },
+                    {
+                        type: "input",
+                        name: "quantity",
+                        message: "How many are you adding?"
+                    }
+                ]).then(function(newProduct) {
+                    var query = connection.query("INSERT INTO products SET ?", {
+                        item_id: res.length + 1,
+                        product_name: newProduct.productName,
+                        department_name: newProduct.department,
+                        price: newProduct.price,
+                        stock_quantity: newProduct.quantity
+                    })
+                    console.log("Your new item is: ");
+                    console.log("Item #: " + query.values.item_id + " || Product: " + query.values.product_name + " || Price: " + query.values.price + " || Quantity: " + query.values.stock_quantity)
+
+                })
+            })
         }
     })
 }
