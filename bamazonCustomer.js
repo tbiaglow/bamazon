@@ -26,7 +26,7 @@ function promptPurchase() {
     connection.query("SELECT * FROM products", function(err, res) {
         if (err) throw err;
         for (i = 0; i < res.length; i++) {
-            console.log("Item #: " + res[i].item_id + " || Product: " + res[i].product_name + " || Price: " + res[i].price);
+            console.log("Item #: " + res[i].item_id + " || Product: " + res[i].product_name + " || Price: " + res[i].price + " || Sales: " + res[i].product_sales);
         }
         // connection.end;
         inquirer.prompt([
@@ -50,11 +50,13 @@ function promptPurchase() {
                 function(err) {
                     if (err) throw err;
                 })
+                connection.query("UPDATE products SET ? WHERE ?",
+                [{product_sales: res[user.id - 1].price * user.number + res[user.id - 1].product_sales}, {item_id: res[user.id - 1].item_id}],
+                function(err) {
+                    if (err) throw err;
+                })
                 connection.query("SELECT * FROM products", function(err, resNew) {
                     if (err) throw err
-                    // console.log("ID: " + resNew[user.id - 1].item_id)
-                    // console.log("Name: " + resNew[user.id - 1].product_name)
-                    // console.log("New quantity: " + resNew[user.id - 1].stock_quantity)
                     cost = user.number * resNew[user.id - 1].price
                     console.log("Your total comes to: " + cost)
                 })
