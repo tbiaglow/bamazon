@@ -32,9 +32,15 @@ function giveOptions() {
             choices: ["View Product Sales by Department", "Add New Department"]
         }
     ]).then(function(choice) {
-        if (choice.choice === "View Product Sales by Department") {}
+        if (choice.choice === "View Product Sales by Department") {
+            connection.query("SELECT * FROM departments", function(err, res) {
+                if (err) throw err;
+                const table = cTable.getTable(res)
+                console.log(table);
+            })
+        }
         else if (choice.choice === "Add New Department") {
-            connection.query("SELECT * FROM departments", function(err, res){
+            connection.query("SELECT * FROM departments", function(err, res) {
                 if (err) throw err;
                 inquirer.prompt([
                     {
