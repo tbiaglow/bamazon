@@ -35,10 +35,22 @@ function giveOptions() {
         if (choice.choice === "View Product Sales by Department") {
             connection.query("SELECT * FROM departments", function(err, res) {
                 if (err) throw err;
+                // const table = cTable.getTable(res)
+                // console.log(table);
+
+            connection.query("SELECT SUM(product_sales) AS product_sales, department_name FROM products GROUP BY department_name", function(err1, res1) {
+                if (err1) throw err;
+                // console.log(res1[0].product_sales);
+                for (i = 0; i < res.length; i++) {
+                    res[i].product_sales = res1[i].product_sales
+                    res[i].total_profit = res[i].product_sales - res[i].over_head_costs
+                }
                 const table = cTable.getTable(res)
                 console.log(table);
             })
+        })
         }
+        
         else if (choice.choice === "Add New Department") {
             connection.query("SELECT * FROM departments", function(err, res) {
                 if (err) throw err;
