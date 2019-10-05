@@ -1,8 +1,10 @@
+//Dependencies
 var mysql = require("mysql");
 var inquirer = require("inquirer");
 var cTable = require("console.table");
 require("dotenv").config();
 
+//Set up connection to MySQL workbench
 var connection = mysql.createConnection({
     host: "localhost",
 
@@ -17,13 +19,14 @@ var connection = mysql.createConnection({
     database: "bamazon"
 });
 
+//Upon connection, notify user and run giveOptions function
 connection.connect(function(err) {
     if (err) throw err;
     console.log("connected as id " + connection.threadId + "\n");
-    // displayItems();
     giveOptions();
 });
 
+//Function to present user with a list of their options and then run the function associated with that option
 function giveOptions() {
     inquirer.prompt([
         {
@@ -33,28 +36,28 @@ function giveOptions() {
             choices: ["View Product Sales by Department", "Add New Department"]
         }
     ]).then(function(choice) {
+        //If user chooses to view product sales, get all from departments table
         if (choice.choice === "View Product Sales by Department") {
             connection.query("SELECT * FROM departments", function(err, res) {
                 if (err) throw err;
-                // const table = cTable.getTable(res)
-                // console.log(table);
-
+            //Then sum the sales for each product and subtract it from the overhead to get total profit
             connection.query("SELECT SUM(product_sales) AS product_sales, department_name FROM products GROUP BY department_name", function(err1, res1) {
                 if (err1) throw err;
-                // console.log(res1[0].product_sales);
                 for (i = 0; i < res.length; i++) {
                     res[i].product_sales = res1[i].product_sales
                     res[i].total_profit = res[i].product_sales - res[i].over_head_costs
                 }
+                //Log this information using cTable (console.table)
                 const table = cTable.getTable(res)
                 console.log(table);
             })
         })
         }
-        
+        //If user chooses to add new department, get all from departments
         else if (choice.choice === "Add New Department") {
             connection.query("SELECT * FROM departments", function(err, res) {
                 if (err) throw err;
+                //Then prompt for name and overhead of new department
                 inquirer.prompt([
                     {
                         type: "input",
@@ -67,6 +70,7 @@ function giveOptions() {
                         message: "What are the expected overhead costs of the department?"
                     }
                 ]).then(function(newProduct) {
+                    //Then insert prompt information into departments table
                     var query = connection.query("INSERT INTO departments SET ?", {
                         department_id: res.length + 1,
                         department_name: newProduct.departmentName,
